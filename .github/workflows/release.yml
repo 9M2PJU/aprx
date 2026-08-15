@@ -87,17 +87,8 @@ jobs:
           path: ${{ matrix.artifact }}
 
   build-macos:
-    name: Build macOS (${{ matrix.arch }})
-    strategy:
-      matrix:
-        include:
-          - os: macos-13
-            arch: amd64
-            artifact: aprx-macos-amd64
-          - os: macos-latest
-            arch: arm64
-            artifact: aprx-macos-arm64
-    runs-on: ${{ matrix.os }}
+    name: Build macOS (arm64)
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       
@@ -105,13 +96,13 @@ jobs:
         run: |
           ./configure
           make
-          mv aprx ${{ matrix.artifact }}
+          mv aprx aprx-macos-arm64
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact }}
-          path: ${{ matrix.artifact }}
+          name: aprx-macos-arm64
+          path: aprx-macos-arm64
 
   build-freebsd:
     name: Build FreeBSD (amd64)
