@@ -1028,7 +1028,7 @@ void interface_receive_3rdparty(const struct aprx_interface *aif, char **heads, 
 }
 
 int debug = 3;
-struct timeval tick;
+
 int main(int argc, char *argv[]) {
   struct serialport S;
   memset(&S, 0, sizeof(S));
