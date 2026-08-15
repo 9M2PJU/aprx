@@ -35,11 +35,11 @@ jobs:
       
       - name: Install dependencies (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
-        run: apt-get update && apt-get install -y gcc make libssl-dev git
+        run: apt-get update && apt-get install -y build-essential libssl-dev git perl
         
       - name: Install dependencies (Fedora)
         if: matrix.distro == 'fedora'
-        run: dnf install -y gcc make openssl-devel git
+        run: dnf install -y gcc make openssl-devel git perl
         
       - name: Build
         run: |
@@ -72,10 +72,10 @@ jobs:
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.cpu }}
-          distro: debian_latest
+          distro: ubuntu22.04
           run: |
             apt-get update
-            apt-get install -y build-essential libssl-dev git
+            apt-get install -y build-essential libssl-dev git perl
             ./configure
             make
             mv aprx ${{ matrix.artifact }}
@@ -123,7 +123,7 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
-          prepare: pkg install -y gmake gcc openssl
+          prepare: pkg install -y gmake perl5
           run: |
             ./configure
             gmake
