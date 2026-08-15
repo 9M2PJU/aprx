@@ -17,6 +17,7 @@ jobs:
     name: Build Linux (${{ matrix.distro }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - distro: ubuntu
@@ -46,7 +47,7 @@ jobs:
         
       - name: Install dependencies (Arch Linux)
         if: matrix.distro == 'archlinux'
-        run: pacman -Syu --noconfirm base-devel git perl
+        run: pacman -Syu --noconfirm base-devel git perl openssl sudo
         
       - name: Build and Package (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
@@ -78,15 +79,17 @@ jobs:
           make dist
           mkdir -p pkg-output
           # We need to run makepkg as non-root user
-          useradd -m builduser
-          chown -R builduser:builduser .
-          cp archlinux/PKGBUILD .
-          cp ../aprx-*.tar.gz .
+          useradd -m builduser || true
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          mkdir -p /home/builduser/build
+          cp archlinux/PKGBUILD /home/builduser/build/
+          cp ../aprx-*.tar.gz /home/builduser/build/
           # Get correct version from tarball
           ARCH_VER=$(ls aprx-*.tar.gz | head -n 1 | sed 's/.*aprx-\(.*\)\.tar\.gz/\1/')
-          sed -i "s/^pkgver=.*/pkgver=$ARCH_VER/" PKGBUILD
-          su - builduser -c "cd $(pwd) && makepkg -s --noconfirm"
-          find . -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/ \; || true
+          sed -i "s/^pkgver=.*/pkgver=$ARCH_VER/" /home/builduser/build/PKGBUILD
+          chown -R builduser:builduser /home/builduser
+          su builduser -c "cd /home/builduser/build && makepkg --nodeps --noconfirm"
+          find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/ \; || true
           mv aprx ${{ matrix.artifact_name }}
           
       - name: Upload Binary Artifact
