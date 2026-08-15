@@ -35,23 +35,46 @@ jobs:
       
       - name: Install dependencies (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
-        run: apt-get update && apt-get install -y build-essential libssl-dev git perl
+        run: apt-get update && apt-get install -y build-essential libssl-dev git perl debhelper fakeroot dpkg-dev
         
       - name: Install dependencies (Fedora)
         if: matrix.distro == 'fedora'
-        run: dnf install -y gcc make openssl-devel git perl
+        run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools
         
-      - name: Build
+      - name: Build and Package (Debian/Ubuntu)
+        if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
         run: |
           ./configure
           make
+          make make-deb
+          mkdir -p pkg-output
+          mv ../aprx_*.deb pkg-output/ || true
           mv aprx ${{ matrix.artifact_name }}
           
-      - name: Upload Artifact
+      - name: Build and Package (Fedora)
+        if: matrix.distro == 'fedora'
+        run: |
+          ./configure
+          make
+          make dist
+          mkdir -p pkg-output
+          rpmbuild -ta ../aprx-*.tar.gz --define "_rpmdir $(pwd)/pkg-output" || true
+          # Note: rpmbuild with _rpmdir will put it in an arch subdirectory like pkg-output/x86_64/
+          find pkg-output -name "*.rpm" -exec mv {} pkg-output/ \; || true
+          mv aprx ${{ matrix.artifact_name }}
+          
+      - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_name }}
+
+      - name: Upload Package Artifacts
+        if: matrix.distro == 'ubuntu' || matrix.distro == 'debian' || matrix.distro == 'fedora'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-pkg
+          path: pkg-output/*.*
 
   build-pi:
     name: Build Raspberry Pi (${{ matrix.arch }})
