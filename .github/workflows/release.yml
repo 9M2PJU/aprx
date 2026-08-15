@@ -1,0 +1,149 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux-distros:
+    name: Build Linux (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - distro: ubuntu
+            image: ubuntu:latest
+            artifact_name: aprx-ubuntu-amd64
+          - distro: debian
+            image: debian:latest
+            artifact_name: aprx-debian-amd64
+          - distro: fedora
+            image: fedora:latest
+            artifact_name: aprx-fedora-amd64
+    container:
+      image: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies (Debian/Ubuntu)
+        if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
+        run: apt-get update && apt-get install -y gcc make libssl-dev git
+        
+      - name: Install dependencies (Fedora)
+        if: matrix.distro == 'fedora'
+        run: dnf install -y gcc make openssl-devel git
+        
+      - name: Build
+        run: |
+          ./configure
+          make
+          mv aprx ${{ matrix.artifact_name }}
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}
+
+  build-pi:
+    name: Build Raspberry Pi (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: armhf
+            cpu: armv7
+            artifact: aprx-raspberrypi-armhf
+          - arch: arm64
+            cpu: aarch64
+            artifact: aprx-raspberrypi-arm64
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build in QEMU
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.cpu }}
+          distro: debian_latest
+          run: |
+            apt-get update
+            apt-get install -y build-essential libssl-dev git
+            ./configure
+            make
+            mv aprx ${{ matrix.artifact }}
+            
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  build-macos:
+    name: Build macOS (${{ matrix.arch }})
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            arch: amd64
+            artifact: aprx-macos-amd64
+          - os: macos-latest
+            arch: arm64
+            artifact: aprx-macos-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build
+        run: |
+          ./configure
+          make
+          mv aprx ${{ matrix.artifact }}
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  build-freebsd:
+    name: Build FreeBSD (amd64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build on FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: pkg install -y gmake gcc openssl
+          run: |
+            ./configure
+            gmake
+            mv aprx aprx-freebsd-amd64
+            
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aprx-freebsd-amd64
+          path: aprx-freebsd-amd64
+
+  release:
+    name: Upload to Release
+    needs: [build-linux-distros, build-pi, build-macos, build-freebsd]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
