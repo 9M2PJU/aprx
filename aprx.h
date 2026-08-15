@@ -33,11 +33,7 @@
 #ifdef HAVE_STDDEF_H
 # include <stddef.h>
 #endif
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #if defined(HAVE_PTHREAD_CREATE) && defined(ENABLE_PTHREAD)
 #include <pthread.h>
@@ -184,14 +180,7 @@ extern const char *pidfile;
 extern void printtime(char *buf, int buflen);
 extern void aprx_syslog_init(const char *syslog_fac);
 
-#ifdef HAVE_STDARG_H
-#ifdef __STDC__
 extern void aprxlog(const char *fmt, ...);
-#endif
-#else
-/* VARARGS */
-extern void aprxlog(va_list);
-#endif
 extern void rflog(const char *portname, char direction, int discard, const char *tnc2buf, int tnc2len);
 extern void rfloghex(const char *portname, char direction, int discard, const uint8_t *buf, int buflen);
 

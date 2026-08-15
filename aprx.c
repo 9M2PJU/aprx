@@ -566,50 +566,26 @@ void aprx_syslog_init(const char *syslog_facility_name)
 	}
 }
 
-#ifdef HAVE_STDARG_H
-#ifdef __STDC__
 void aprxlog(const char *fmt, ...)
-#else
-void aprxlog(fmt)
-#endif
-#else
-/* VARARGS */
-void aprxlog(va_list)
-va_dcl
-#endif
 {
 	va_list ap;
 	char timebuf[60];
 
         printtime(timebuf, sizeof(timebuf));
 	if (verbout) {
-#ifdef 	HAVE_STDARG_H
           va_start(ap, fmt);
-#else
-          const char *fmt;
-          va_start(ap);
-          fmt    = va_arg(ap, const char *);
-#endif
 
 	  fprintf(stdout, "%s ", timebuf);
 	  vfprintf(stdout, fmt, ap);
           (void)fprintf(stdout, "\n");
 
-#ifdef 	HAVE_STDARG_H
           va_end(ap);
-#endif
 	}
 
         if (aprxlogfile) {
           FILE *fp;
 
-#ifdef 	HAVE_STDARG_H
           va_start(ap, fmt);
-#else
-          const char *fmt;
-          va_start(ap);
-          fmt    = va_arg(ap, const char *);
-#endif
 
 
 #if defined(HAVE_PTHREAD_CREATE) && defined(ENABLE_PTHREAD)
@@ -627,9 +603,7 @@ va_dcl
           pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 #endif
 
-#ifdef 	HAVE_STDARG_H
           va_end(ap);
-#endif
         }
 }
 
