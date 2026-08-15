@@ -1,0 +1,21 @@
+pkgname=aprx
+pkgver=2.9.1
+pkgrel=1
+pkgdesc="APRS Digipeater and iGate"
+arch=('x86_64')
+url="https://github.com/9M2PJU/aprx"
+license=('BSD')
+depends=('openssl' 'perl')
+source=("aprx-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname-$pkgver"
+  ./configure --prefix=/usr --sysconfdir=/etc
+  make
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  make DESTDIR="$pkgdir/" install
+}

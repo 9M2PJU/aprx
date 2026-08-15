@@ -28,6 +28,9 @@ jobs:
           - distro: fedora
             image: fedora:latest
             artifact_name: aprx-fedora-amd64
+          - distro: archlinux
+            image: archlinux:latest
+            artifact_name: aprx-archlinux-amd64
     container:
       image: ${{ matrix.image }}
     steps:
@@ -40,6 +43,10 @@ jobs:
       - name: Install dependencies (Fedora)
         if: matrix.distro == 'fedora'
         run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools
+        
+      - name: Install dependencies (Arch Linux)
+        if: matrix.distro == 'archlinux'
+        run: pacman -Syu --noconfirm base-devel git perl
         
       - name: Build and Package (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
@@ -62,6 +69,25 @@ jobs:
           # Note: rpmbuild with _rpmdir will put it in an arch subdirectory like pkg-output/x86_64/
           find pkg-output -name "*.rpm" -exec mv {} pkg-output/ \; || true
           mv aprx ${{ matrix.artifact_name }}
+
+      - name: Build and Package (Arch Linux)
+        if: matrix.distro == 'archlinux'
+        run: |
+          ./configure
+          make
+          make dist
+          mkdir -p pkg-output
+          # We need to run makepkg as non-root user
+          useradd -m builduser
+          chown -R builduser:builduser .
+          cp archlinux/PKGBUILD .
+          cp ../aprx-*.tar.gz .
+          # Get correct version from tarball
+          ARCH_VER=$(ls aprx-*.tar.gz | head -n 1 | sed 's/.*aprx-\(.*\)\.tar\.gz/\1/')
+          sed -i "s/^pkgver=.*/pkgver=$ARCH_VER/" PKGBUILD
+          su - builduser -c "cd $(pwd) && makepkg -s --noconfirm"
+          find . -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/ \; || true
+          mv aprx ${{ matrix.artifact_name }}
           
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
@@ -70,7 +96,7 @@ jobs:
           path: ${{ matrix.artifact_name }}
 
       - name: Upload Package Artifacts
-        if: matrix.distro == 'ubuntu' || matrix.distro == 'debian' || matrix.distro == 'fedora'
+        if: matrix.distro == 'ubuntu' || matrix.distro == 'debian' || matrix.distro == 'fedora' || matrix.distro == 'archlinux'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-pkg
@@ -137,17 +163,42 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
-          prepare: pkg install -y gmake perl5
+          prepare: pkg install -y gmake perl5 git
           run: |
-            ./configure
+            ./configure --prefix=/usr/local --sysconfdir=/usr/local/etc
             gmake
+            # Create FreeBSD package
+            mkdir -p pkg-output
+            mkdir -p /tmp/aprx-install/usr/local/sbin
+            mkdir -p /tmp/aprx-install/usr/local/share/man/man8
+            mkdir -p /tmp/aprx-install/usr/local/etc
+            gmake DESTDIR=/tmp/aprx-install install
+            APRX_VER=$(git describe --tags 2>/dev/null || echo v2.9-detached)
+            APRX_VER=${APRX_VER#v}
+            cat << EOF > /tmp/aprx-install/+MANIFEST
+            name: "aprx"
+            version: "${APRX_VER}"
+            origin: "comms/aprx"
+            comment: "APRS Digipeater and iGate"
+            desc: "Aprx is an APRS specific Digipeater and iGate."
+            maintainer: "kennethfinnegan2007@gmail.com"
+            www: "https://github.com/9M2PJU/aprx"
+            prefix: "/usr/local"
+            EOF
+            pkg create -m /tmp/aprx-install -r /tmp/aprx-install -o pkg-output/
             mv aprx aprx-freebsd-amd64
             
-      - name: Upload Artifact
+      - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
           name: aprx-freebsd-amd64
           path: aprx-freebsd-amd64
+
+      - name: Upload Package Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: aprx-freebsd-amd64-pkg
+          path: pkg-output/*
 
   release:
     name: Upload to Release
