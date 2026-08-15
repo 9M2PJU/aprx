@@ -6,12 +6,18 @@
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-v2.9-brightgreen.svg)]()
-[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20BSD%20%7C%20macOS-lightgrey.svg)]()
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20BSD-lightgrey.svg)]()
 
 *A highly versatile, lightweight gateway bridging the RF world and the internet.*
 
 ---
 </div>
+
+## 📦 Installation
+
+Automated builds provide pre-compiled packages for various distributions on every push to `master`. You can download the latest `.deb`, `.rpm`, `.pkg.tar.zst` (Arch Linux), and `.pkg` (FreeBSD) from the [Releases](https://github.com/9M2PJU/aprx/releases) page.
+
+Alternatively, you can build from source.
 
 ## 🌟 What is APRS?
 
@@ -24,7 +30,7 @@ Data is transmitted over radio frequencies (typically **144.390 MHz** in North A
 
 ## 🚀 Introducing Aprx
 
-Aprx (currently **v2.9**) is a robust daemon running on Unix-like systems (Linux, BSD, MacOS). It is especially popular on low-power, embedded hardware like the Raspberry Pi or custom router boards. 
+Aprx (currently **v2.9**) is a robust daemon running on Unix-like systems (Linux, BSD). It is especially popular on low-power, embedded hardware like the Raspberry Pi or custom router boards. 
 
 Unlike many older APRS programs, Aprx **does not** strictly require the OS to have native AX.25 kernel support, though it can seamlessly integrate with it if present. It processes raw KISS frames from TNCs or D-PRS data, evaluates routing rules, and acts as a sophisticated bridge.
 
