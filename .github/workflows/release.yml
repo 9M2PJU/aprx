@@ -87,6 +87,7 @@ jobs:
           # Get correct version from tarball
           ARCH_VER=$(ls /home/builduser/build/aprx-*.tar.gz | head -n 1 | sed 's/.*aprx-\(.*\)\.tar\.gz/\1/' | tr -cd '0-9.')
           [ -n "$ARCH_VER" ] || ARCH_VER="2.9.1"
+          mv /home/builduser/build/aprx-*.tar.gz /home/builduser/build/aprx-$ARCH_VER.tar.gz || true
           sed -i "s/^pkgver=.*/pkgver=$ARCH_VER/" /home/builduser/build/PKGBUILD
           chown -R builduser:builduser /home/builduser
           su builduser -c "cd /home/builduser/build && makepkg --nodeps --noconfirm"
