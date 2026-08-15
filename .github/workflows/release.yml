@@ -66,8 +66,8 @@ jobs:
           make
           make dist
           mkdir -p pkg-output
-          rpmbuild -ta ../aprx-*.tar.gz --define "_rpmdir $(pwd)/pkg-output" || true
-          # Note: rpmbuild with _rpmdir will put it in an arch subdirectory like pkg-output/x86_64/
+          rpmdev-setuptree || true
+          rpmbuild -ta ../aprx-*.tar.gz --define "_rpmdir $(pwd)/pkg-output"
           find pkg-output -name "*.rpm" -exec mv {} pkg-output/ \; || true
           mv aprx ${{ matrix.artifact_name }}
 
@@ -85,7 +85,7 @@ jobs:
           cp archlinux/PKGBUILD /home/builduser/build/
           cp ../aprx-*.tar.gz /home/builduser/build/
           # Get correct version from tarball
-          ARCH_VER=$(ls aprx-*.tar.gz | head -n 1 | sed 's/.*aprx-\(.*\)\.tar\.gz/\1/')
+          ARCH_VER=$(ls /home/builduser/build/aprx-*.tar.gz | head -n 1 | sed 's/.*aprx-\(.*\)\.tar\.gz/\1/')
           sed -i "s/^pkgver=.*/pkgver=$ARCH_VER/" /home/builduser/build/PKGBUILD
           chown -R builduser:builduser /home/builduser
           su builduser -c "cd /home/builduser/build && makepkg --nodeps --noconfirm"

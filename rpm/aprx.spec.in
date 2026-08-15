@@ -62,7 +62,7 @@ rules, optionally relay APRS packets from APRS-IS to radio (TX-iGate)
 %setup -q
 
 %build
-%configure --with-erlangstorage CFLAGS="-m32 -march=i386" LDFLAGS="-m32 -march=i386"
+%configure --with-erlangstorage
 make %{?_smp_mflags}
 make logrotate.aprx
 
@@ -90,10 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 # INSTALL not bundled
-%doc LICENSE README TODO PROTOCOLS
+%doc LICENSE README.md TODO PROTOCOLS
 %doc ChangeLog
 %doc aprx.conf aprx-complex.conf
-%doc doc/aprx-manual.pdf
 %doc ViscousDigipeater.README ViscousDigipeaterTxEffect.png
 %dir /var/log/aprx
 %if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
@@ -106,8 +105,8 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/logrotate.d/aprx
 %{_sbindir}/aprx
 %{_sbindir}/aprx-stat
-%doc %{_mandir}/man8/aprx.8.gz
-%doc %{_mandir}/man8/aprx-stat.8.gz
+%{_mandir}/man8/aprx*
+%{_mandir}/man8/aprx-stat*
 
 
 %changelog
