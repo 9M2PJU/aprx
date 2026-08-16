@@ -22,16 +22,16 @@ jobs:
         include:
           - distro: ubuntu
             image: ubuntu:latest
-            binary_name: aprx-ubuntu-x86_64
+            target_name: aprx-2.9.1-ubuntu-x86_64
           - distro: debian
             image: debian:latest
-            binary_name: aprx-debian-x86_64
+            target_name: aprx-2.9.1-debian-x86_64
           - distro: fedora
             image: fedora:latest
-            binary_name: aprx-fedora-x86_64
+            target_name: aprx-2.9.1-fedora-x86_64
           - distro: archlinux
             image: archlinux:latest
-            binary_name: aprx-archlinux-x86_64
+            target_name: aprx-2.9.1-archlinux-x86_64
     container:
       image: ${{ matrix.image }}
     steps:
@@ -39,15 +39,15 @@ jobs:
       
       - name: Install dependencies (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
-        run: apt-get update && apt-get install -y build-essential libssl-dev git perl debhelper fakeroot dpkg-dev
+        run: apt-get update && apt-get install -y build-essential libssl-dev git perl debhelper fakeroot dpkg-dev tar gzip
         
       - name: Install dependencies (Fedora)
         if: matrix.distro == 'fedora'
-        run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools
+        run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools tar gzip
         
       - name: Install dependencies (Arch Linux)
         if: matrix.distro == 'archlinux'
-        run: pacman -Syu --noconfirm base-devel git perl openssl sudo
+        run: pacman -Syu --noconfirm base-devel git perl openssl sudo tar gzip
         
       - name: Build and Package (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
@@ -56,13 +56,14 @@ jobs:
           make
           make make-deb
           mkdir -p pkg-output
-          # Rename .deb to standard format aprx-2.9.1-<distro>-x86_64.deb
           for deb in ../aprx_*.deb; do
             if [ -f "$deb" ]; then
-              mv "$deb" "pkg-output/aprx-2.9.1-${{ matrix.distro }}-x86_64.deb"
+              mv "$deb" "pkg-output/${{ matrix.target_name }}.deb"
             fi
           done
-          mv aprx ${{ matrix.binary_name }}
+          mkdir -p /tmp/tarbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
+          tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
           
       - name: Build and Package (Fedora)
         if: matrix.distro == 'fedora'
@@ -78,9 +79,10 @@ jobs:
           install -m 644 rpm/aprx.service /tmp/buildroot/usr/lib/systemd/system/aprx.service
           sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > /tmp/aprx.spec
           rpmbuild -bb --buildroot /tmp/buildroot --define "_topdir /tmp/rpmbuild" --define "_rpmdir $(pwd)/pkg-output" /tmp/aprx.spec --noclean --nodeps --define "buildroot /tmp/buildroot" || true
-          # Normalize RPM output filename
-          find $(pwd)/pkg-output /tmp/rpmbuild -type f -name "*.rpm" -exec mv {} pkg-output/aprx-2.9.1-fedora-x86_64.rpm \; || true
-          mv aprx ${{ matrix.binary_name }}
+          find $(pwd)/pkg-output /tmp/rpmbuild -type f -name "*.rpm" -exec mv {} "pkg-output/${{ matrix.target_name }}.rpm" \; || true
+          mkdir -p /tmp/tarbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
+          tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
 
       - name: Build and Package (Arch Linux)
         if: matrix.distro == 'archlinux'
@@ -94,14 +96,16 @@ jobs:
           cp archlinux/PKGBUILD /home/builduser/build/PKGBUILD
           chown -R builduser:builduser /home/builduser
           su builduser -c "cd /home/builduser/build && makepkg -e --nodeps --noconfirm"
-          find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/aprx-2.9.1-archlinux-x86_64.pkg.tar.zst \; || true
-          mv aprx ${{ matrix.binary_name }}
+          find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} "pkg-output/${{ matrix.target_name }}.pkg.tar.zst" \; || true
+          mkdir -p /tmp/tarbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
+          tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
           
-      - name: Upload Binary Artifact
+      - name: Upload Tarball Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.binary_name }}
-          path: ${{ matrix.binary_name }}
+          name: ${{ matrix.target_name }}-tarball
+          path: ${{ matrix.target_name }}.tar.gz
 
       - name: Upload Package Artifacts
         uses: actions/upload-artifact@v4
@@ -118,10 +122,10 @@ jobs:
         include:
           - arch: armhf
             cpu: armv7
-            binary_name: aprx-raspberrypi-armhf
+            target_name: aprx-2.9.1-raspberrypi-armhf
           - arch: arm64
             cpu: aarch64
-            binary_name: aprx-raspberrypi-arm64
+            target_name: aprx-2.9.1-raspberrypi-arm64
     steps:
       - uses: actions/checkout@v4
       
@@ -132,16 +136,18 @@ jobs:
           distro: ubuntu22.04
           run: |
             apt-get update
-            apt-get install -y build-essential libssl-dev git perl
+            apt-get install -y build-essential libssl-dev git perl tar gzip
             ./configure
             make -j2
-            mv aprx ${{ matrix.binary_name }}
+            mkdir -p /tmp/tarbuild
+            cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
+            tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
             
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.binary_name }}
-          path: ${{ matrix.binary_name }}
+          name: ${{ matrix.target_name }}
+          path: ${{ matrix.target_name }}.tar.gz
 
   build-macos:
     name: Build macOS (arm64)
@@ -153,13 +159,15 @@ jobs:
         run: |
           ./configure
           make
-          mv aprx aprx-macos-arm64
+          mkdir -p /tmp/tarbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
+          tar czvf aprx-2.9.1-macos-arm64.tar.gz -C /tmp/tarbuild .
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aprx-macos-arm64
-          path: aprx-macos-arm64
+          name: aprx-2.9.1-macos-arm64
+          path: aprx-2.9.1-macos-arm64.tar.gz
 
   build-freebsd:
     name: Build FreeBSD (amd64)
@@ -194,13 +202,15 @@ jobs:
             for f in pkg-output/*.pkg; do
               [ -f "$f" ] && mv "$f" pkg-output/aprx-2.9.1-freebsd-x86_64.pkg
             done
-            mv aprx aprx-freebsd-x86_64
+            mkdir -p /tmp/tarbuild
+            cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
+            tar czvf aprx-2.9.1-freebsd-x86_64.tar.gz -C /tmp/tarbuild .
             
-      - name: Upload Binary Artifact
+      - name: Upload Tarball Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aprx-freebsd-x86_64
-          path: aprx-freebsd-x86_64
+          name: aprx-2.9.1-freebsd-x86_64-tarball
+          path: aprx-2.9.1-freebsd-x86_64.tar.gz
 
       - name: Upload Package Artifacts
         uses: actions/upload-artifact@v4
