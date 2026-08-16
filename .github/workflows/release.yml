@@ -62,12 +62,14 @@ jobs:
       - name: Build and Package (Fedora)
         if: matrix.distro == 'fedora'
         run: |
+          mkdir -p pkg-output /tmp/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
           ./configure
           make
-          mkdir -p pkg-output
-          sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > aprx.spec
-          rpmbuild -bb aprx.spec --define "_topdir /tmp/rpmbuild" --define "_builddir $(pwd)" --define "_rpmdir $(pwd)/pkg-output"
-          find pkg-output -name "*.rpm" -exec mv {} pkg-output/ \; || true
+          make dist
+          cp ../aprx-*.tar.gz /tmp/rpmbuild/SOURCES/
+          sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > /tmp/rpmbuild/SPECS/aprx.spec
+          rpmbuild -ba /tmp/rpmbuild/SPECS/aprx.spec --define "_topdir /tmp/rpmbuild"
+          find /tmp/rpmbuild/RPMS -name "*.rpm" -exec mv {} pkg-output/ \; || true
           mv aprx ${{ matrix.artifact_name }}
 
       - name: Build and Package (Arch Linux)
