@@ -2,146 +2,220 @@
   
 # 📡 APRX
 
-**Advanced APRS IGate & Digipeater**
+**Advanced Amateur Radio APRS IGate & Digipeater**
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v2.9-brightgreen.svg)]()
-[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20BSD-lightgrey.svg)]()
+[![Version](https://img.shields.io/badge/version-v2.9.1-brightgreen.svg)]()
+[![Build & Release](https://github.com/9M2PJU/aprx/actions/workflows/release.yml/badge.svg)](https://github.com/9M2PJU/aprx/actions/workflows/release.yml)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20FreeBSD%20%7C%20macOS-lightgrey.svg)]()
 
-*A highly versatile, lightweight gateway bridging the RF world and the internet.*
+*A highly versatile, ultra-lightweight gateway bridging the RF amateur radio world and the global APRS-IS network.*
 
 ---
 </div>
 
-## 📦 Installation
+## 📦 Pre-Built Releases & Packages
 
-Automated builds provide pre-compiled packages for various distributions on every push to `master`. You can download the latest `.deb`, `.rpm`, `.pkg.tar.zst` (Arch Linux), and `.pkg` (FreeBSD) from the [Releases](https://github.com/9M2PJU/aprx/releases) page.
+Every commit to `master` and release tag triggers automated builds generating native packages and standalone archive bundles available on the **[Releases](https://github.com/9M2PJU/aprx/releases)** page:
 
-Alternatively, you can build from source.
+### 1. Native Distribution Packages
+Install directly using your system's package manager:
+
+| OS / Distribution | Architecture | Package File | Install Command |
+| :--- | :--- | :--- | :--- |
+| **Debian** | `x86_64` | `aprx-2.9.1-debian-x86_64.deb` | `sudo dpkg -i aprx-2.9.1-debian-x86_64.deb` |
+| **Ubuntu** | `x86_64` | `aprx-2.9.1-ubuntu-x86_64.deb` | `sudo dpkg -i aprx-2.9.1-ubuntu-x86_64.deb` |
+| **Fedora / RHEL** | `x86_64` | `aprx-2.9.1-fedora-x86_64.rpm` | `sudo dnf install aprx-2.9.1-fedora-x86_64.rpm` |
+| **Arch Linux** | `x86_64` | `aprx-2.9.1-archlinux-x86_64.pkg.tar.zst` | `sudo pacman -U aprx-2.9.1-archlinux-x86_64.pkg.tar.zst` |
+| **FreeBSD** | `x86_64` | `aprx-2.9.1-freebsd-x86_64.pkg` | `sudo pkg add aprx-2.9.1-freebsd-x86_64.pkg` |
+
+### 2. Standalone Binary Archives (`.tar.gz`)
+Each archive contains the compiled executable binary (`aprx`), sample configuration template (`aprx.conf.in`), documentation, and license:
+
+| Platform | Target Architecture | Archive Filename |
+| :--- | :--- | :--- |
+| **Raspberry Pi (64-bit)** | `arm64` / `aarch64` | `aprx-2.9.1-raspberrypi-arm64.tar.gz` |
+| **Raspberry Pi (32-bit)** | `armhf` / `armv7` | `aprx-2.9.1-raspberrypi-armhf.tar.gz` |
+| **macOS (Apple Silicon)** | `arm64` (M1/M2/M3/M4) | `aprx-2.9.1-macos-arm64.tar.gz` |
+| **Linux (Universal)** | `x86_64` | `aprx-2.9.1-ubuntu-x86_64.tar.gz` / `debian` / `fedora` / `archlinux` |
+| **FreeBSD** | `x86_64` | `aprx-2.9.1-freebsd-x86_64.tar.gz` |
+
+---
 
 ## 🌟 What is APRS?
 
-**Automatic Packet Reporting System (APRS)** is an amateur radio-based system for real-time digital communications. Developed by Bob Bruninga (WB4APR), it is widely used for:
-- 📍 Tracking GPS coordinates
-- 🌦️ Weather station telemetry
-- ✉️ Text messages & emergency announcements
+**Automatic Packet Reporting System (APRS)** is an amateur radio communications system designed for exchanging tactical, real-time data across local radio networks and the global Internet. Developed by Bob Bruninga (**WB4APR**), APRS supports:
+- 📍 **GPS Position Tracking:** Stations, vehicles, high-altitude balloons, and maritime objects.
+- 🌦️ **Weather Station Telemetry:** Real-time wind speed, rainfall, temperature, and humidity.
+- ✉️ **Two-Way Messaging:** Free-form text messages, bulletins, and emergency disaster traffic.
 
-Data is transmitted over radio frequencies (typically **144.390 MHz** in North America, **144.800 MHz** in Europe) and is bridged to the internet via the global **APRS-IS** network.
+Packets are transmitted over VHF frequencies (**144.390 MHz** in North America, **144.800 MHz** in Europe, **144.390 MHz** in Malaysia/Asia) and bridged to the internet via the global **APRS-IS** backbone.
 
-## 🚀 Introducing Aprx
+---
 
-Aprx (currently **v2.9**) is a robust daemon running on Unix-like systems (Linux, BSD). It is especially popular on low-power, embedded hardware like the Raspberry Pi or custom router boards. 
+## 🚀 What is Aprx?
 
-Unlike many older APRS programs, Aprx **does not** strictly require the OS to have native AX.25 kernel support, though it can seamlessly integrate with it if present. It processes raw KISS frames from TNCs or D-PRS data, evaluates routing rules, and acts as a sophisticated bridge.
+**Aprx** is a high-performance, lightweight, and dedicated APRS IGate (Internet Gateway) and Digipeater daemon designed for Unix-like operating systems (Linux, FreeBSD, macOS). It is engineered for maximum reliability with minimal CPU and memory footprints, making it the gold standard for low-power embedded platforms (Raspberry Pi, OpenWrt routers, embedded x86).
 
-## 🛠️ How Aprx Works
+Unlike legacy APRS software, Aprx:
+- **Does not require native AX.25 kernel modules** (runs entirely in user-space using direct KISS serial / TCP connections), though it can attach to Linux kernel AX.25 network interfaces if desired.
+- Implements the intelligent **Viscous Digipeater** algorithm to eliminate packet collisions on RF channels.
+- Supports multi-port and cross-band digipeating with comprehensive path filtering and callsign sanitization.
 
-Aprx performs two primary functions flawlessly:
+---
 
-<details>
-<summary><b> 1️⃣ Internet Gateway (IGate)</b></summary>
-<br>
+## 🛠️ Key Capabilities
 
-- **Rx-IGate:** Listens to local RF traffic, validates it, and forwards legitimate APRS packets to the global APRS-IS backbone.
-- **Tx-IGate:** Subscribes to specific geographic or callsign-based filters from APRS-IS and transmits relevant packets back out to the local RF network.
+### 1️⃣ Internet Gateway (IGate)
+- **Rx-IGate (RF ➡️ APRS-IS):** Receives packets from radio modems (TNCs, soundmodems), validates callsigns, checks paths, and forwards legitimate traffic to APRS-IS servers.
+- **Tx-IGate (APRS-IS ➡️ RF):** Subscribes to APRS-IS server filters, filters messages directed to heard local stations, and transmits them back onto the RF channel without broadcasting unnecessary global traffic.
 
-</details>
+### 2️⃣ Viscous Digipeater
+Standard digipeaters blindly repeat packets as soon as they hear them, causing collisions when multiple stations transmit simultaneously. 
 
-<details>
-<summary><b> 2️⃣ Viscous Digipeater</b></summary>
-<br>
+Aprx's **Viscous Digipeater** algorithm:
+1. Receives a packet and holds it in a short, configurable delay buffer (e.g., 200–500 ms).
+2. Listens to the frequency during this delay.
+3. If another digipeater retransmits the same packet first, Aprx **drops** its transmission.
+4. If no other station repeats it, Aprx transmits. This drastically reduces RF channel congestion.
 
-One of Aprx's most powerful features is its **Viscous Digipeater** algorithm. 
-Standard digipeaters blindly retransmit packets, which quickly leads to channel congestion and collisions. 
-
-The Viscous Digipeater introduces an intentional delay. If it hears another station repeat the exact same packet during this waiting period, it **aborts** its own transmission. This significantly reduces RF clutter and improves overall network efficiency.
-
-</details>
+---
 
 ## 🏗️ Architecture & Packet Flow
-
-The following diagram illustrates how Aprx processes and routes incoming traffic:
 
 ```mermaid
 graph TD
     subgraph RF Interfaces
-        TNC1[🔌 Hardware TNC / USB Serial]
-        TNC2[🌐 Remote KISS over TCP]
-        KAX25[🐧 Linux Kernel AX.25]
-        DPRS[📻 D-STAR D-PRS]
+        TNC1[🔌 Hardware TNC / Serial KISS]
+        TNC2[🌐 Remote KISS over TCP / Direwolf]
+        KAX25[🐧 Linux Kernel AX.25 / ax0]
+        DPRS[📻 D-STAR D-PRS Gateway]
     end
 
-    subgraph Aprx Core
-        FILTER[🛡️ Packet Filtering & Validation]
-        VDIGI[🧠 Viscous Digipeater Logic]
-        ERLANG[📊 Erlang Monitor & Telemetry]
-        ROUTER[🔀 Routing Engine]
+    subgraph Aprx Core Engine
+        FILTER[🛡️ Filter & Validation Engine]
+        VDIGI[🧠 Viscous Digipeater Buffer]
+        ERLANG[📊 Erlang Channel Load Monitor]
+        ROUTER[🔀 Packet Router & Dispatcher]
     end
 
     subgraph Internet Backbone
-        APRSIS((☁️ APRS-IS Network))
+        APRSIS((☁️ Global APRS-IS Network))
     end
 
-    %% Input flows
+    %% Inputs
     TNC1 -->|KISS Frames| FILTER
     TNC2 -->|KISS Frames| FILTER
     KAX25 -->|AX.25 Frames| FILTER
-    DPRS -->|D-PRS Data| FILTER
+    DPRS -->|D-PRS Stream| FILTER
 
-    %% Core logic
+    %% Filtering & Digipeating
     FILTER --> VDIGI
-    VDIGI -->|Duplicate Heard?| NULL((Discard 🛑))
-    VDIGI -->|Retransmit| ROUTER
+    VDIGI -->|Duplicate Heard| NULL((Discard 🛑))
+    VDIGI -->|Timer Expired| ROUTER
     
     FILTER --> ROUTER
     
-    %% IGate flows
-    ROUTER -->|Rx-IGate| APRSIS
-    APRSIS -->|Tx-IGate| ROUTER
+    %% Gateway Flow
+    ROUTER -->|Rx-IGate Forward| APRSIS
+    APRSIS -->|Tx-IGate Filtered| ROUTER
     
-    %% Transmit flows
-    ROUTER -->|RF Transmit| TNC1
-    ROUTER -->|RF Transmit| KAX25
+    %% Transmit
+    ROUTER -->|Transmit RF| TNC1
+    ROUTER -->|Transmit RF| TNC2
+    ROUTER -->|Transmit RF| KAX25
     
-    %% Telemetry flow
-    FILTER -.->|Traffic Stats| ERLANG
-    ERLANG -.->|20 min Telemetry| ROUTER
+    %% Telemetry
+    FILTER -.->|Traffic Counters| ERLANG
+    ERLANG -.->|Telemetry Packet| ROUTER
 
     style NULL fill:#ffe6e6,stroke:#ff4d4d,stroke-width:2px;
     style APRSIS fill:#e6f2ff,stroke:#4da6ff,stroke-width:2px;
 ```
 
-## ✨ Key Features
+---
 
-| Feature | Description |
-| :--- | :--- |
-| **🔌 Broad Modem Support** | Works natively with classical serial ports, USB adapters, remote TCP serial ports, and various KISS protocol variants. |
-| **🛡️ Advanced Filtering** | Automatically drops invalid sources (`WIDE`, `RELAY`, `TRACE`, `NOCALL`) and respects APRS routing exclusions (`RFONLY`, `NOGATE`, `TCPIP`). |
-| **📊 Built-in Telemetry** | The internal `erlang-monitor` calculates channel traffic load across all interfaces and broadcasts this as APRS telemetry every 20 minutes. |
-| **🔀 Cross-Interface Routing**| Can route packets intelligently between multiple RF interfaces and APRS-IS. |
-| **🐧 OS Flexibility** | Works flawlessly entirely in user-space, but can connect to promiscuous Linux Kernel AX.25 interfaces if configured. |
+## 🔧 Building from Source
 
-## ⚡ Quick Start
+### Dependencies
+- **Debian / Ubuntu / Raspberry Pi OS:**
+  ```bash
+  sudo apt-get update && sudo apt-get install -y build-essential libssl-dev git perl
+  ```
+- **Fedora / RHEL:**
+  ```bash
+  sudo dnf install -y gcc make openssl-devel git perl
+  ```
+- **Arch Linux:**
+  ```bash
+  sudo pacman -S base-devel openssl perl git
+  ```
+- **FreeBSD:**
+  ```bash
+  pkg install gmake perl5 git
+  ```
 
-1. **Configure:** Edit the configuration file (default location is `/etc/aprx.conf`).
-2. **Run:** Start the daemon using standard service commands or directly from the CLI:
+### Build & Install
+```bash
+git clone https://github.com/9M2PJU/aprx.git
+cd aprx
+./configure --prefix=/usr --sysconfdir=/etc
+make
+sudo make install
+```
+
+---
+
+## ⚙️ Configuration & Quick Start
+
+1. **Copy sample configuration:**
    ```bash
-   aprx -f /etc/aprx.conf
+   sudo cp aprx.conf.in /etc/aprx.conf
    ```
-3. **Debug:** Use runtime options like `-v` (verbose) or `-d` (debug) for troubleshooting.
+2. **Edit `/etc/aprx.conf` with your station details:**
+   ```ini
+   mycall    9M2PJU-10
+   
+   <aprsis>
+     passcode  12345
+     server    rotate.aprs2.net  14580
+   </aprsis>
+   
+   <interface>
+     serial-device /dev/ttyUSB0 9600 8n1 KISS
+     callsign      $mycall
+     tx-ok         true
+   </interface>
+   
+   <beacon>
+     beaconmode both
+     cycle-size 20m
+     beacon symbol "I#" lat "0308.50N" lon "10141.50E" comment "Aprx RX-IGate & Digipeater"
+   </beacon>
+   ```
+3. **Run Aprx in foreground (debug mode):**
+   ```bash
+   aprx -dd -v -f /etc/aprx.conf
+   ```
+4. **Run as a systemd service:**
+   ```bash
+   sudo systemctl enable --now aprx
+   sudo systemctl status aprx
+   ```
 
-## 🤝 Credits & Authors
+---
 
-Aprx is an open-source project made possible by the contributions of the amateur radio community.
+## 🤝 Credits & Maintainers
 
-* 🧑‍💻 **Matti Aarnio (OH2MQK):** Original author and maintainer (2007-2014)
-* 🧑‍💻 **Kenneth W. Finnegan (W6KWF):** Current maintainer (2014-Present)
+* 🧑‍💻 **Matti Aarnio (OH2MQK):** Original author & architect (2007–2014)
+* 🧑‍💻 **Kenneth W. Finnegan (W6KWF):** Longtime upstream maintainer (2014–Present)
+* 🧑‍💻 **9M2PJU:** CI/CD modern packaging & cross-platform automation pipeline
 
 <div align="center">
   <br>
   <a href="http://thelifeofkenneth.com/aprx">🌍 Project Homepage</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  <a href="https://github.com/PhirePhly/aprx/">💻 Source Repository</a>
+  <a href="https://github.com/9M2PJU/aprx">💻 GitHub Repository</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="http://groups.google.com/group/aprx-software">💬 Google Group</a>
 </div>
