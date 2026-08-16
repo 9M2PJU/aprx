@@ -3,7 +3,7 @@ pkgver=2.9.1
 pkgrel=1
 pkgdesc="APRS Digipeater and iGate"
 arch=('x86_64')
-url="https://github.com/9M2PJU/aprx"
+url="https://github.com/9M2PJU/aprx-installer"
 license=('BSD')
 depends=('openssl' 'perl')
 

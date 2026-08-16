@@ -21,8 +21,8 @@ FROM debian:bookworm-slim
 
 LABEL org.opencontainers.image.title="Aprx" \
       org.opencontainers.image.description="Advanced Amateur Radio APRS IGate & Digipeater" \
-      org.opencontainers.image.url="https://github.com/9M2PJU/aprx" \
-      org.opencontainers.image.source="https://github.com/9M2PJU/aprx" \
+      org.opencontainers.image.url="https://github.com/9M2PJU/aprx-installer" \
+      org.opencontainers.image.source="https://github.com/9M2PJU/aprx-installer" \
       org.opencontainers.image.licenses="BSD-3-Clause"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

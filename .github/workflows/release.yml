@@ -191,7 +191,7 @@ jobs:
             comment: "APRS Digipeater and iGate"
             desc: "Aprx is an APRS specific Digipeater and iGate."
             maintainer: "kennethfinnegan2007@gmail.com"
-            www: "https://github.com/9M2PJU/aprx"
+            www: "https://github.com/9M2PJU/aprx-installer"
             prefix: "/usr/local"
             EOF
             pkg create -m /tmp/aprx-install -r /tmp/aprx-install -o pkg-output/

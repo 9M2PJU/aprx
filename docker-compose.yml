@@ -1,6 +1,6 @@
 services:
   aprx:
-    image: ghcr.io/9m2pju/aprx:latest
+    image: ghcr.io/9m2pju/aprx-installer:latest
     container_name: aprx
     restart: unless-stopped
     # Use host networking if Direwolf is on localhost or for AX.25 network ports:

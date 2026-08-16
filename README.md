@@ -5,10 +5,10 @@
 **Advanced Amateur Radio APRS IGate & Digipeater**
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-v2.9.1-brightgreen.svg)](https://github.com/9M2PJU/aprx/releases)
-[![Build & Release](https://github.com/9M2PJU/aprx/actions/workflows/release.yml/badge.svg)](https://github.com/9M2PJU/aprx/actions/workflows/release.yml)
-[![Docker](https://img.shields.io/badge/docker-GHCR-blue.svg)](https://github.com/9M2PJU/aprx/pkgs/container/aprx)
-[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20FreeBSD%20%7C%20macOS-lightgrey.svg)](https://github.com/9M2PJU/aprx/releases)
+[![Version](https://img.shields.io/badge/version-v2.9.1-brightgreen.svg)](https://github.com/9M2PJU/aprx-installer/releases)
+[![Build & Release](https://github.com/9M2PJU/aprx-installer/actions/workflows/release.yml/badge.svg)](https://github.com/9M2PJU/aprx-installer/actions/workflows/release.yml)
+[![Docker](https://img.shields.io/badge/docker-GHCR-blue.svg)](https://github.com/9M2PJU/aprx-installer/pkgs/container/aprx)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20FreeBSD%20%7C%20macOS-lightgrey.svg)](https://github.com/9M2PJU/aprx-installer/releases)
 
 *A high-performance, ultra-lightweight gateway and digipeater bridging RF amateur radio networks with the global APRS-IS backbone.*
 
@@ -76,7 +76,7 @@ Automated release packages and binaries are generated directly by GitHub Actions
 | **Raspberry Pi (32-bit)** | `armhf` / `armv7l` | Standalone ZIP | `aprx-2.9.1-raspberrypi-armhf.zip` |
 | **macOS** | `arm64` (Apple Silicon) | Standalone ZIP | `aprx-2.9.1-macos-arm64.zip` |
 
-👉 Download pre-built assets from the **[Releases Page](https://github.com/9M2PJU/aprx/releases)**.
+👉 Download pre-built assets from the **[Releases Page](https://github.com/9M2PJU/aprx-installer/releases)**.
 
 ---
 
@@ -92,7 +92,7 @@ Create a dedicated directory for Aprx and extract the sample configuration file 
 mkdir -p ~/aprx-docker && cd ~/aprx-docker
 
 # Extract the default configuration template from the image
-docker run --rm --entrypoint cat ghcr.io/9m2pju/aprx:latest /etc/aprx.conf.default > aprx.conf
+docker run --rm --entrypoint cat ghcr.io/9m2pju/aprx-installer:latest /etc/aprx.conf.default > aprx.conf
 
 # Edit aprx.conf with your callsign, passcode, and interface settings
 nano aprx.conf
@@ -109,7 +109,7 @@ docker run -d \
   --restart unless-stopped \
   -v $(pwd)/aprx.conf:/etc/aprx.conf:ro \
   -v aprx-logs:/var/log/aprx \
-  ghcr.io/9m2pju/aprx:latest
+  ghcr.io/9m2pju/aprx-installer:latest
 ```
 
 #### Option B: USB Hardware TNC / Serial Mode (`/dev/ttyUSB0`)
@@ -121,7 +121,7 @@ docker run -d \
   --device /dev/ttyUSB0:/dev/ttyUSB0 \
   -v $(pwd)/aprx.conf:/etc/aprx.conf:ro \
   -v aprx-logs:/var/log/aprx \
-  ghcr.io/9m2pju/aprx:latest
+  ghcr.io/9m2pju/aprx-installer:latest
 ```
 
 ---
@@ -132,7 +132,7 @@ Create a `docker-compose.yml` file:
 ```yaml
 services:
   aprx:
-    image: ghcr.io/9m2pju/aprx:latest
+    image: ghcr.io/9m2pju/aprx-installer:latest
     container_name: aprx
     restart: unless-stopped
     volumes:
@@ -175,7 +175,7 @@ docker exec -it aprx aprx-stat -x
 docker restart aprx
 
 # Update to latest Aprx container release
-docker pull ghcr.io/9m2pju/aprx:latest
+docker pull ghcr.io/9m2pju/aprx-installer:latest
 docker compose up -d --pull always
 ```
 
@@ -188,7 +188,7 @@ docker compose up -d --pull always
 #### Option A: Native `.deb` Package (Recommended)
 ```bash
 # Download the package for your distribution
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-ubuntu-x86_64.deb
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-ubuntu-x86_64.deb
 
 # Install using apt (automatically handles dependencies)
 sudo apt update
@@ -197,7 +197,7 @@ sudo apt install ./aprx-2.9.1-ubuntu-x86_64.deb
 
 #### Option B: Standalone Archive
 ```bash
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-ubuntu-x86_64.zip
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-ubuntu-x86_64.zip
 unzip aprx-2.9.1-ubuntu-x86_64.zip -d aprx-dist
 sudo cp aprx-dist/aprx /usr/sbin/aprx
 sudo cp aprx-dist/aprx-stat /usr/bin/aprx-stat
@@ -212,11 +212,11 @@ Pre-compiled binary archives are provided for Raspberry Pi (Raspberry Pi OS / Di
 
 ```bash
 # For 64-bit OS (Raspberry Pi 3/4/5 / Zero 2W on 64-bit kernel):
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-raspberrypi-arm64.zip
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-raspberrypi-arm64.zip
 unzip aprx-2.9.1-raspberrypi-arm64.zip -d aprx-rpi
 
 # For 32-bit OS (Raspberry Pi 1/2/Zero or 32-bit OS):
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-raspberrypi-armhf.zip
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-raspberrypi-armhf.zip
 unzip aprx-2.9.1-raspberrypi-armhf.zip -d aprx-rpi
 
 # Install binaries and configuration
@@ -253,13 +253,13 @@ sudo systemctl daemon-reload
 #### Option A: Native RPM Package (Recommended)
 ```bash
 # Download and install with DNF
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-fedora-x86_64.rpm
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-fedora-x86_64.rpm
 sudo dnf install ./aprx-2.9.1-fedora-x86_64.rpm
 ```
 
 #### Option B: Standalone Archive
 ```bash
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-fedora-x86_64.zip
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-fedora-x86_64.zip
 unzip aprx-2.9.1-fedora-x86_64.zip -d aprx-fedora
 sudo cp aprx-fedora/aprx /usr/sbin/aprx
 sudo cp aprx-fedora/aprx-stat /usr/bin/aprx-stat
@@ -272,7 +272,7 @@ sudo cp aprx-fedora/aprx.conf.in /etc/aprx.conf
 
 ```bash
 # Download and install with Pacman
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-archlinux-x86_64.pkg.tar.zst
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-archlinux-x86_64.pkg.tar.zst
 sudo pacman -U aprx-2.9.1-archlinux-x86_64.pkg.tar.zst
 ```
 
@@ -282,13 +282,13 @@ sudo pacman -U aprx-2.9.1-archlinux-x86_64.pkg.tar.zst
 
 #### Option A: Native FreeBSD Package
 ```bash
-wget https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-freebsd-x86_64.pkg
+wget https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-freebsd-x86_64.pkg
 sudo pkg add aprx-2.9.1-freebsd-x86_64.pkg
 ```
 
 #### Option B: Standalone Archive
 ```bash
-fetch https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-freebsd-x86_64.zip
+fetch https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-freebsd-x86_64.zip
 unzip aprx-2.9.1-freebsd-x86_64.zip -d aprx-freebsd
 sudo cp aprx-freebsd/aprx /usr/local/sbin/aprx
 sudo cp aprx-freebsd/aprx-stat /usr/local/bin/aprx-stat
@@ -301,7 +301,7 @@ sudo cp aprx-freebsd/aprx.conf.in /usr/local/etc/aprx.conf
 
 ```bash
 # Download the macOS archive
-curl -LO https://github.com/9M2PJU/aprx/releases/download/v2.9.1/aprx-2.9.1-macos-arm64.zip
+curl -LO https://github.com/9M2PJU/aprx-installer/releases/download/v2.9.1/aprx-2.9.1-macos-arm64.zip
 unzip aprx-2.9.1-macos-arm64.zip -d aprx-macos
 
 # Copy binaries into your executable path
@@ -329,7 +329,7 @@ If you wish to compile Aprx from source for custom optimization or unlisted oper
 
 #### Build Commands
 ```bash
-git clone https://github.com/9M2PJU/aprx.git
+git clone https://github.com/9M2PJU/aprx-installer.git
 cd aprx
 ./configure --prefix=/usr --sysconfdir=/etc
 make
@@ -594,7 +594,7 @@ aprx-stat -S -i 5
   <br>
   <a href="http://thelifeofkenneth.com/aprx">🌍 Project Homepage</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  <a href="https://github.com/9M2PJU/aprx">💻 GitHub Repository</a>
+  <a href="https://github.com/9M2PJU/aprx-installer">💻 GitHub Repository</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="http://groups.google.com/group/aprx-software">💬 Google Group</a>
 </div>
