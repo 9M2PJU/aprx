@@ -133,7 +133,7 @@ jobs:
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.cpu }}
-          distro: debian_latest
+          distro: debian_bullseye
           run: |
             apt-get update
             apt-get install -y build-essential libssl-dev git perl zip
