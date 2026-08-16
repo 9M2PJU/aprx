@@ -84,15 +84,25 @@ Automated release packages and binaries are generated directly by GitHub Actions
 
 Multi-architecture container images (`linux/amd64`, `linux/arm64`, `linux/arm/v7`) are automatically built and published to **GitHub Container Registry (GHCR)**.
 
-### Pulling the Image
+### Step 1: Prepare Directory & Configuration
+
+Create a dedicated directory for Aprx and extract the sample configuration file directly from the image:
+
 ```bash
-# Pull multi-arch image from GitHub Container Registry
-docker pull ghcr.io/9m2pju/aprx:latest
+mkdir -p ~/aprx-docker && cd ~/aprx-docker
+
+# Extract the default configuration template from the image
+docker run --rm --entrypoint cat ghcr.io/9m2pju/aprx:latest /etc/aprx.conf.default > aprx.conf
+
+# Edit aprx.conf with your callsign, passcode, and interface settings
+nano aprx.conf
 ```
 
-### Running with Docker CLI
+---
 
-#### 1. With Direwolf over TCP / APRS-IS Gateway:
+### Step 2: Run with Docker CLI
+
+#### Option A: Network / Software Modem Mode (e.g., Direwolf via TCP KISS)
 ```bash
 docker run -d \
   --name aprx \
@@ -102,7 +112,8 @@ docker run -d \
   ghcr.io/9m2pju/aprx:latest
 ```
 
-#### 2. With a Physical USB Hardware TNC (`/dev/ttyUSB0`):
+#### Option B: USB Hardware TNC / Serial Mode (`/dev/ttyUSB0`)
+When using a physical USB radio modem or TNC, pass the device into the container:
 ```bash
 docker run -d \
   --name aprx \
@@ -113,7 +124,9 @@ docker run -d \
   ghcr.io/9m2pju/aprx:latest
 ```
 
-### Running with Docker Compose
+---
+
+### Step 3: Run with Docker Compose (Recommended)
 
 Create a `docker-compose.yml` file:
 ```yaml
@@ -128,17 +141,42 @@ services:
     # If using a physical USB TNC:
     # devices:
     #   - /dev/ttyUSB0:/dev/ttyUSB0
-    # If using host network (for Direwolf running on host localhost):
+    # If using host network (e.g., Direwolf running on host machine):
     # network_mode: host
 
 volumes:
   aprx-logs:
 ```
 
-Start the container:
+Start the service:
 ```bash
+# Launch container in background
 docker compose up -d
+
+# View live container logs
 docker compose logs -f
+```
+
+---
+
+### Step 4: Container Management & Diagnostics
+
+```bash
+# View live Aprx log output
+docker logs -f aprx
+
+# Run aprx-stat real-time statistics directly inside the running container
+docker exec -it aprx aprx-stat -S
+
+# View channel Erlang load metrics
+docker exec -it aprx aprx-stat -x
+
+# Reload / Restart after editing aprx.conf
+docker restart aprx
+
+# Update to latest Aprx container release
+docker pull ghcr.io/9m2pju/aprx:latest
+docker compose up -d --pull always
 ```
 
 ---
