@@ -64,10 +64,9 @@ jobs:
         run: |
           ./configure
           make
-          make dist
           mkdir -p pkg-output
-          rpmdev-setuptree || true
-          rpmbuild -ta ../aprx-*.tar.gz --define "_rpmdir $(pwd)/pkg-output"
+          sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > aprx.spec
+          rpmbuild -bb aprx.spec --define "_topdir /tmp/rpmbuild" --define "_builddir $(pwd)" --define "_rpmdir $(pwd)/pkg-output"
           find pkg-output -name "*.rpm" -exec mv {} pkg-output/ \; || true
           mv aprx ${{ matrix.artifact_name }}
 
