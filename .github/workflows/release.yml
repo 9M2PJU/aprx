@@ -233,6 +233,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*
-          tag_name: ${{ github.ref == 'refs/heads/master' && 'latest' || github.ref_name }}
-          name: ${{ github.ref == 'refs/heads/master' && 'Latest Master Build' || github.ref_name }}
-          prerelease: ${{ github.ref == 'refs/heads/master' }}
+          tag_name: ${{ github.ref == 'refs/heads/master' && 'v2.9.1' || github.ref_name }}
+          name: ${{ github.ref == 'refs/heads/master' && 'Aprx v2.9.1' || github.ref_name }}
+          prerelease: false
+          make_latest: true
