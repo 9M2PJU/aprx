@@ -133,12 +133,12 @@ jobs:
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.cpu }}
-          distro: ubuntu22.04
+          distro: debian_latest
           run: |
             apt-get update
             apt-get install -y build-essential libssl-dev git perl tar gzip
             ./configure
-            make -j2
+            make
             mkdir -p /tmp/tarbuild
             cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
             tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
