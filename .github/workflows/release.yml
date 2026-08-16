@@ -133,10 +133,10 @@ jobs:
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.cpu }}
-          distro: debian_bullseye
+          distro: ubuntu22.04
           run: |
-            apt-get update
-            apt-get install -y build-essential libssl-dev git perl zip
+            apt-get update -y
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential gcc libc6-dev libssl-dev git perl zip
             ./configure
             make
             mkdir -p /tmp/zipbuild
