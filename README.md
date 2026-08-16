@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-v2.9.1-brightgreen.svg)](https://github.com/9M2PJU/aprx/releases)
 [![Build & Release](https://github.com/9M2PJU/aprx/actions/workflows/release.yml/badge.svg)](https://github.com/9M2PJU/aprx/actions/workflows/release.yml)
-[![Docker](https://img.shields.io/badge/docker-GHCR%20%7C%20DockerHub-blue.svg)](https://github.com/9M2PJU/aprx/pkgs/container/aprx)
+[![Docker](https://img.shields.io/badge/docker-GHCR-blue.svg)](https://github.com/9M2PJU/aprx/pkgs/container/aprx)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20FreeBSD%20%7C%20macOS-lightgrey.svg)](https://github.com/9M2PJU/aprx/releases)
 
 *A high-performance, ultra-lightweight gateway and digipeater bridging RF amateur radio networks with the global APRS-IS backbone.*
@@ -20,7 +20,7 @@
 1. [Overview & Features](#-overview--features)
 2. [Supported Platforms & Packages](#-supported-platforms--packages)
 3. [🐳 Docker & Container Deployment](#-docker--container-deployment)
-   - [Pulling Images (GHCR & Docker Hub)](#pulling-the-image)
+   - [Pulling Image from GHCR](#pulling-the-image)
    - [Running with Docker CLI](#running-with-docker-cli)
    - [Running with Docker Compose](#running-with-docker-compose)
 4. [Installation Guide (By Operating System)](#-installation-guide)
@@ -82,15 +82,12 @@ Automated release packages and binaries are generated directly by GitHub Actions
 
 ## 🐳 Docker & Container Deployment
 
-Multi-architecture container images (`linux/amd64`, `linux/arm64`, `linux/arm/v7`) are automatically built and published to **GitHub Container Registry (GHCR)** and **Docker Hub**.
+Multi-architecture container images (`linux/amd64`, `linux/arm64`, `linux/arm/v7`) are automatically built and published to **GitHub Container Registry (GHCR)**.
 
 ### Pulling the Image
 ```bash
-# From GitHub Container Registry (Recommended)
+# Pull multi-arch image from GitHub Container Registry
 docker pull ghcr.io/9m2pju/aprx:latest
-
-# Or from Docker Hub
-docker pull 9m2pju/aprx:latest
 ```
 
 ### Running with Docker CLI
