@@ -43,7 +43,7 @@ jobs:
         
       - name: Install dependencies (Fedora)
         if: matrix.distro == 'fedora'
-        run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools zip
+        run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools systemd systemd-rpm-macros zip
         
       - name: Install dependencies (Arch Linux)
         if: matrix.distro == 'archlinux'
