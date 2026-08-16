@@ -24,7 +24,7 @@
    - [Pulling Image from GHCR](#pulling-the-image)
    - [Running with Docker CLI](#running-with-docker-cli)
    - [Running with Docker Compose](#running-with-docker-compose)
-5. [Installation Guide (Manual / By Operating System)](#-installation-guide)
+5. [💻 Manual Installation Guide](#-manual-installation-guide)
    - [Debian & Ubuntu](#1-debian--ubuntu)
    - [Raspberry Pi OS (arm64 & armhf)](#2-raspberry-pi-os-32-bit--64-bit)
    - [Fedora, RHEL & Rocky Linux](#3-fedora-rhel--rocky-linux)
@@ -32,20 +32,20 @@
    - [FreeBSD](#5-freebsd)
    - [macOS (Apple Silicon & Intel)](#6-macos-apple-silicon--intel)
    - [Building from Source (Universal)](#7-building-from-source-universal)
-5. [Configuration Guide](#-configuration-guide)
+6. [⚙️ Configuration Guide](#-configuration-guide)
    - [Configuration File Locations](#configuration-file-locations)
    - [Scenario A: Simple Rx-Only IGate (Serial TNC or TCP KISS)](#scenario-a-simple-rx-only-igate)
    - [Scenario B: Full 2-Way IGate with Viscous Digipeater](#scenario-b-full-2-way-igate--viscous-digipeater)
    - [Scenario C: Direwolf Software Modem over TCP](#scenario-c-direwolf-soundcard-modem-via-tcp-kiss)
    - [Scenario D: Linux Kernel AX.25 Interface](#scenario-d-linux-kernel-ax25-interface)
-6. [Running & Service Management](#-running--service-management)
+7. [🚀 Running & Service Management](#-running--service-management)
    - [Testing & Foreground Debug Mode](#testing--foreground-debug-mode)
    - [Linux (systemd)](#linux-systemd-service)
    - [FreeBSD (rc.d)](#freebsd-rcd-service)
    - [macOS (launchd)](#macos-launchd-service)
-7. [Statistics & Telemetry (`aprx-stat`)](#-statistics--telemetry-aprx-stat)
-8. [Troubleshooting & Best Practices](#-troubleshooting--best-practices)
-9. [Maintainers & Credits](#-maintainers--credits)
+8. [📊 Statistics & Telemetry (`aprx-stat`)](#-statistics--telemetry-aprx-stat)
+9. [🔍 Troubleshooting & Best Practices](#-troubleshooting--best-practices)
+10. [👥 Maintainers & Credits](#-maintainers--credits)
 
 ---
 
@@ -199,7 +199,7 @@ docker compose up -d --pull always
 
 ---
 
-## 💻 Installation Guide
+## 💻 Manual Installation Guide
 
 ### 1. Debian & Ubuntu
 
