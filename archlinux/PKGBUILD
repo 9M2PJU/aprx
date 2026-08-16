@@ -6,18 +6,8 @@ arch=('x86_64')
 url="https://github.com/9M2PJU/aprx"
 license=('BSD')
 depends=('openssl' 'perl')
-source=("aprx-$pkgver.tar.gz")
-sha256sums=('SKIP')
-
-build() {
-  cd "$srcdir"
-  cd aprx-*
-  ./configure --prefix=/usr --sysconfdir=/etc --sbindir=/usr/bin --mandir=/usr/share/man
-  make
-}
 
 package() {
-  cd "$srcdir"
-  cd aprx-*
+  cd "$srcdir/.." || cd "$srcdir"
   make DESTDIR="$pkgdir" install
 }

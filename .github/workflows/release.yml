@@ -74,23 +74,14 @@ jobs:
       - name: Build and Package (Arch Linux)
         if: matrix.distro == 'archlinux'
         run: |
-          ./configure
+          ./configure --prefix=/usr --sysconfdir=/etc --sbindir=/usr/sbin --mandir=/usr/share/man
           make
-          make dist
           mkdir -p pkg-output
-          # We need to run makepkg as non-root user
           useradd -m builduser || true
-          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           mkdir -p /home/builduser/build
-          cp archlinux/PKGBUILD /home/builduser/build/
-          cp ../aprx-*.tar.gz /home/builduser/build/
-          # Get correct version from tarball
-          ARCH_VER=$(ls /home/builduser/build/aprx-*.tar.gz | head -n 1 | sed 's/.*aprx-\(.*\)\.tar\.gz/\1/' | tr -cd '0-9.')
-          [ -n "$ARCH_VER" ] || ARCH_VER="2.9.1"
-          mv /home/builduser/build/aprx-*.tar.gz /home/builduser/build/aprx-$ARCH_VER.tar.gz || true
-          sed -i "s/^pkgver=.*/pkgver=$ARCH_VER/" /home/builduser/build/PKGBUILD
+          cp -r . /home/builduser/build/
           chown -R builduser:builduser /home/builduser
-          su builduser -c "cd /home/builduser/build && makepkg --nodeps --noconfirm"
+          su builduser -c "cd /home/builduser/build && makepkg -e --nodeps --noconfirm"
           find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/ \; || true
           mv aprx ${{ matrix.artifact_name }}
           
