@@ -29,16 +29,16 @@ Install directly using your system's package manager:
 | **Arch Linux** | `x86_64` | `aprx-2.9.1-archlinux-x86_64.pkg.tar.zst` | `sudo pacman -U aprx-2.9.1-archlinux-x86_64.pkg.tar.zst` |
 | **FreeBSD** | `x86_64` | `aprx-2.9.1-freebsd-x86_64.pkg` | `sudo pkg add aprx-2.9.1-freebsd-x86_64.pkg` |
 
-### 2. Standalone Binary Archives (`.tar.gz`)
+### 2. Standalone Binary Archives (`.zip`)
 Each archive contains the compiled executable binary (`aprx`), sample configuration template (`aprx.conf.in`), documentation, and license:
 
 | Platform | Target Architecture | Archive Filename |
 | :--- | :--- | :--- |
-| **Raspberry Pi (64-bit)** | `arm64` / `aarch64` | `aprx-2.9.1-raspberrypi-arm64.tar.gz` |
-| **Raspberry Pi (32-bit)** | `armhf` / `armv7` | `aprx-2.9.1-raspberrypi-armhf.tar.gz` |
-| **macOS (Apple Silicon)** | `arm64` (M1/M2/M3/M4) | `aprx-2.9.1-macos-arm64.tar.gz` |
-| **Linux (Universal)** | `x86_64` | `aprx-2.9.1-ubuntu-x86_64.tar.gz` / `debian` / `fedora` / `archlinux` |
-| **FreeBSD** | `x86_64` | `aprx-2.9.1-freebsd-x86_64.tar.gz` |
+| **Raspberry Pi (64-bit)** | `arm64` / `aarch64` | `aprx-2.9.1-raspberrypi-arm64.zip` |
+| **Raspberry Pi (32-bit)** | `armhf` / `armv7` | `aprx-2.9.1-raspberrypi-armhf.zip` |
+| **macOS (Apple Silicon)** | `arm64` (M1/M2/M3/M4) | `aprx-2.9.1-macos-arm64.zip` |
+| **FreeBSD** | `x86_64` | `aprx-2.9.1-freebsd-x86_64.zip` |
+| **Linux (Universal)** | `x86_64` | `aprx-2.9.1-ubuntu-x86_64.zip` / `debian` / `fedora` / `archlinux` |
 
 ---
 

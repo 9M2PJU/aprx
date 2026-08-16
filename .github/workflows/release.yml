@@ -39,15 +39,15 @@ jobs:
       
       - name: Install dependencies (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
-        run: apt-get update && apt-get install -y build-essential libssl-dev git perl debhelper fakeroot dpkg-dev tar gzip
+        run: apt-get update && apt-get install -y build-essential libssl-dev git perl debhelper fakeroot dpkg-dev zip
         
       - name: Install dependencies (Fedora)
         if: matrix.distro == 'fedora'
-        run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools tar gzip
+        run: dnf install -y gcc make openssl-devel git perl rpm-build rpmdevtools zip
         
       - name: Install dependencies (Arch Linux)
         if: matrix.distro == 'archlinux'
-        run: pacman -Syu --noconfirm base-devel git perl openssl sudo tar gzip
+        run: pacman -Syu --noconfirm base-devel git perl openssl sudo zip
         
       - name: Build and Package (Debian/Ubuntu)
         if: matrix.distro == 'ubuntu' || matrix.distro == 'debian'
@@ -61,9 +61,9 @@ jobs:
               mv "$deb" "pkg-output/${{ matrix.target_name }}.deb"
             fi
           done
-          mkdir -p /tmp/tarbuild
-          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
-          tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
+          mkdir -p /tmp/zipbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/zipbuild/
+          (cd /tmp/zipbuild && zip -9 -r "${OLDPWD}/${{ matrix.target_name }}.zip" .)
           
       - name: Build and Package (Fedora)
         if: matrix.distro == 'fedora'
@@ -80,9 +80,9 @@ jobs:
           sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > /tmp/aprx.spec
           rpmbuild -bb --buildroot /tmp/buildroot --define "_topdir /tmp/rpmbuild" --define "_rpmdir $(pwd)/pkg-output" /tmp/aprx.spec --noclean --nodeps --define "buildroot /tmp/buildroot" || true
           find $(pwd)/pkg-output /tmp/rpmbuild -type f -name "*.rpm" -exec mv {} "pkg-output/${{ matrix.target_name }}.rpm" \; || true
-          mkdir -p /tmp/tarbuild
-          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
-          tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
+          mkdir -p /tmp/zipbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/zipbuild/
+          (cd /tmp/zipbuild && zip -9 -r "${OLDPWD}/${{ matrix.target_name }}.zip" .)
 
       - name: Build and Package (Arch Linux)
         if: matrix.distro == 'archlinux'
@@ -97,15 +97,15 @@ jobs:
           chown -R builduser:builduser /home/builduser
           su builduser -c "cd /home/builduser/build && makepkg -e --nodeps --noconfirm"
           find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} "pkg-output/${{ matrix.target_name }}.pkg.tar.zst" \; || true
-          mkdir -p /tmp/tarbuild
-          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
-          tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
+          mkdir -p /tmp/zipbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/zipbuild/
+          (cd /tmp/zipbuild && zip -9 -r "${OLDPWD}/${{ matrix.target_name }}.zip" .)
           
-      - name: Upload Tarball Artifact
+      - name: Upload Zip Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.target_name }}-tarball
-          path: ${{ matrix.target_name }}.tar.gz
+          name: ${{ matrix.target_name }}-zip
+          path: ${{ matrix.target_name }}.zip
 
       - name: Upload Package Artifacts
         uses: actions/upload-artifact@v4
@@ -136,18 +136,18 @@ jobs:
           distro: debian_latest
           run: |
             apt-get update
-            apt-get install -y build-essential libssl-dev git perl tar gzip
+            apt-get install -y build-essential libssl-dev git perl zip
             ./configure
             make
-            mkdir -p /tmp/tarbuild
-            cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
-            tar czvf "${{ matrix.target_name }}.tar.gz" -C /tmp/tarbuild .
+            mkdir -p /tmp/zipbuild
+            cp aprx aprx.conf.in README.md LICENSE /tmp/zipbuild/
+            (cd /tmp/zipbuild && zip -9 -r "${OLDPWD}/${{ matrix.target_name }}.zip" .)
             
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target_name }}
-          path: ${{ matrix.target_name }}.tar.gz
+          path: ${{ matrix.target_name }}.zip
 
   build-macos:
     name: Build macOS (arm64)
@@ -159,15 +159,15 @@ jobs:
         run: |
           ./configure
           make
-          mkdir -p /tmp/tarbuild
-          cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
-          tar czvf aprx-2.9.1-macos-arm64.tar.gz -C /tmp/tarbuild .
+          mkdir -p /tmp/zipbuild
+          cp aprx aprx.conf.in README.md LICENSE /tmp/zipbuild/
+          (cd /tmp/zipbuild && zip -9 -r "${OLDPWD}/aprx-2.9.1-macos-arm64.zip" .)
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: aprx-2.9.1-macos-arm64
-          path: aprx-2.9.1-macos-arm64.tar.gz
+          path: aprx-2.9.1-macos-arm64.zip
 
   build-freebsd:
     name: Build FreeBSD (amd64)
@@ -179,7 +179,7 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
-          prepare: pkg install -y gmake perl5 git
+          prepare: pkg install -y gmake perl5 git zip
           run: |
             ./configure --prefix=/usr/local --sysconfdir=/usr/local/etc
             gmake
@@ -202,15 +202,15 @@ jobs:
             for f in pkg-output/*.pkg; do
               [ -f "$f" ] && mv "$f" pkg-output/aprx-2.9.1-freebsd-x86_64.pkg
             done
-            mkdir -p /tmp/tarbuild
-            cp aprx aprx.conf.in README.md LICENSE /tmp/tarbuild/
-            tar czvf aprx-2.9.1-freebsd-x86_64.tar.gz -C /tmp/tarbuild .
+            mkdir -p /tmp/zipbuild
+            cp aprx aprx.conf.in README.md LICENSE /tmp/zipbuild/
+            (cd /tmp/zipbuild && zip -9 -r "${OLDPWD}/aprx-2.9.1-freebsd-x86_64.zip" .)
             
-      - name: Upload Tarball Artifact
+      - name: Upload Zip Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aprx-2.9.1-freebsd-x86_64-tarball
-          path: aprx-2.9.1-freebsd-x86_64.tar.gz
+          name: aprx-2.9.1-freebsd-x86_64-zip
+          path: aprx-2.9.1-freebsd-x86_64.zip
 
       - name: Upload Package Artifacts
         uses: actions/upload-artifact@v4
