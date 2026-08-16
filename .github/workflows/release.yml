@@ -22,16 +22,16 @@ jobs:
         include:
           - distro: ubuntu
             image: ubuntu:latest
-            artifact_name: aprx-ubuntu-amd64
+            binary_name: aprx-ubuntu-x86_64
           - distro: debian
             image: debian:latest
-            artifact_name: aprx-debian-amd64
+            binary_name: aprx-debian-x86_64
           - distro: fedora
             image: fedora:latest
-            artifact_name: aprx-fedora-amd64
+            binary_name: aprx-fedora-x86_64
           - distro: archlinux
             image: archlinux:latest
-            artifact_name: aprx-archlinux-amd64
+            binary_name: aprx-archlinux-x86_64
     container:
       image: ${{ matrix.image }}
     steps:
@@ -56,8 +56,13 @@ jobs:
           make
           make make-deb
           mkdir -p pkg-output
-          mv ../aprx_*.deb pkg-output/ || true
-          mv aprx ${{ matrix.artifact_name }}
+          # Rename .deb to standard format aprx-2.9.1-<distro>-x86_64.deb
+          for deb in ../aprx_*.deb; do
+            if [ -f "$deb" ]; then
+              mv "$deb" "pkg-output/aprx-2.9.1-${{ matrix.distro }}-x86_64.deb"
+            fi
+          done
+          mv aprx ${{ matrix.binary_name }}
           
       - name: Build and Package (Fedora)
         if: matrix.distro == 'fedora'
@@ -72,9 +77,10 @@ jobs:
           install -m 644 rpm/aprx.default /tmp/buildroot/etc/sysconfig/aprx
           install -m 644 rpm/aprx.service /tmp/buildroot/usr/lib/systemd/system/aprx.service
           sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > /tmp/aprx.spec
-          rpmbuild -bb --buildroot /tmp/buildroot --define "_topdir /tmp/rpmbuild" --define "_rpmdir $(pwd)/pkg-output" /tmp/aprx.spec --noclean --nodeps --define "buildroot /tmp/buildroot" || rpmbuild -bb --buildroot /tmp/buildroot --define "_rpmdir $(pwd)/pkg-output" /tmp/aprx.spec --short-circuit -bc || true
-          find $(pwd)/pkg-output /tmp/rpmbuild -name "*.rpm" -exec mv {} pkg-output/ \; || true
-          mv aprx ${{ matrix.artifact_name }}
+          rpmbuild -bb --buildroot /tmp/buildroot --define "_topdir /tmp/rpmbuild" --define "_rpmdir $(pwd)/pkg-output" /tmp/aprx.spec --noclean --nodeps --define "buildroot /tmp/buildroot" || true
+          # Normalize RPM output filename
+          find $(pwd)/pkg-output /tmp/rpmbuild -type f -name "*.rpm" -exec mv {} pkg-output/aprx-2.9.1-fedora-x86_64.rpm \; || true
+          mv aprx ${{ matrix.binary_name }}
 
       - name: Build and Package (Arch Linux)
         if: matrix.distro == 'archlinux'
@@ -88,21 +94,20 @@ jobs:
           cp archlinux/PKGBUILD /home/builduser/build/PKGBUILD
           chown -R builduser:builduser /home/builduser
           su builduser -c "cd /home/builduser/build && makepkg -e --nodeps --noconfirm"
-          find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/ \; || true
-          mv aprx ${{ matrix.artifact_name }}
+          find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/aprx-2.9.1-archlinux-x86_64.pkg.tar.zst \; || true
+          mv aprx ${{ matrix.binary_name }}
           
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_name }}
+          name: ${{ matrix.binary_name }}
+          path: ${{ matrix.binary_name }}
 
       - name: Upload Package Artifacts
-        if: matrix.distro == 'ubuntu' || matrix.distro == 'debian' || matrix.distro == 'fedora' || matrix.distro == 'archlinux'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}-pkg
-          path: pkg-output/*.*
+          name: ${{ matrix.distro }}-package
+          path: pkg-output/*
 
   build-pi:
     name: Build Raspberry Pi (${{ matrix.arch }})
@@ -113,10 +118,10 @@ jobs:
         include:
           - arch: armhf
             cpu: armv7
-            artifact: aprx-raspberrypi-armhf
+            binary_name: aprx-raspberrypi-armhf
           - arch: arm64
             cpu: aarch64
-            artifact: aprx-raspberrypi-arm64
+            binary_name: aprx-raspberrypi-arm64
     steps:
       - uses: actions/checkout@v4
       
@@ -130,13 +135,13 @@ jobs:
             apt-get install -y build-essential libssl-dev git perl
             ./configure
             make -j2
-            mv aprx ${{ matrix.artifact }}
+            mv aprx ${{ matrix.binary_name }}
             
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact }}
-          path: ${{ matrix.artifact }}
+          name: ${{ matrix.binary_name }}
+          path: ${{ matrix.binary_name }}
 
   build-macos:
     name: Build macOS (arm64)
@@ -170,17 +175,14 @@ jobs:
           run: |
             ./configure --prefix=/usr/local --sysconfdir=/usr/local/etc
             gmake
-            # Create FreeBSD package
             mkdir -p pkg-output
             mkdir -p /tmp/aprx-install/usr/local/sbin
             mkdir -p /tmp/aprx-install/usr/local/share/man/man8
             mkdir -p /tmp/aprx-install/usr/local/etc
             gmake DESTDIR=/tmp/aprx-install install
-            APRX_VER=$(git describe --tags 2>/dev/null || echo v2.9-detached)
-            APRX_VER=${APRX_VER#v}
             cat << EOF > /tmp/aprx-install/+MANIFEST
             name: "aprx"
-            version: "${APRX_VER}"
+            version: "2.9.1"
             origin: "comms/aprx"
             comment: "APRS Digipeater and iGate"
             desc: "Aprx is an APRS specific Digipeater and iGate."
@@ -189,18 +191,21 @@ jobs:
             prefix: "/usr/local"
             EOF
             pkg create -m /tmp/aprx-install -r /tmp/aprx-install -o pkg-output/
-            mv aprx aprx-freebsd-amd64
+            for f in pkg-output/*.pkg; do
+              [ -f "$f" ] && mv "$f" pkg-output/aprx-2.9.1-freebsd-x86_64.pkg
+            done
+            mv aprx aprx-freebsd-x86_64
             
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: aprx-freebsd-amd64
-          path: aprx-freebsd-amd64
+          name: aprx-freebsd-x86_64
+          path: aprx-freebsd-x86_64
 
       - name: Upload Package Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: aprx-freebsd-amd64-pkg
+          name: freebsd-package
           path: pkg-output/*
 
   release:
@@ -212,11 +217,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
           
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
+          files: artifacts/*
           tag_name: ${{ github.ref == 'refs/heads/master' && 'latest' || github.ref_name }}
           name: ${{ github.ref == 'refs/heads/master' && 'Latest Master Build' || github.ref_name }}
           prerelease: ${{ github.ref == 'refs/heads/master' }}
