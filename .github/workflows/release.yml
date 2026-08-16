@@ -111,6 +111,7 @@ jobs:
     name: Build Raspberry Pi (${{ matrix.arch }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - arch: armhf
@@ -131,7 +132,7 @@ jobs:
             apt-get update
             apt-get install -y build-essential libssl-dev git perl
             ./configure
-            make
+            make -j2
             mv aprx ${{ matrix.artifact }}
             
       - name: Upload Artifact

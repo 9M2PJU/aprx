@@ -49,7 +49,7 @@ UNAME:=$(shell uname)
 
 # generate version strings
 
-VERSION	= $(shell (git describe --tags 2>/dev/null || echo @VERSION_STRING@) | cut -b 2-)
+VERSION	= $(shell (git describe --tags 2>/dev/null || echo @VERSION_STRING@) | sed -e 's/^v//')
 
 ifeq ($(UNAME), FreeBSD)
 DATE:=$(shell LC_ALL=C date -u -r "$(SOURCE_DATE_EPOCH)" +"%Y %B %d")
