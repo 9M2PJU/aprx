@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-v2.9.1-brightgreen.svg)](https://github.com/9M2PJU/aprx/releases)
 [![Build & Release](https://github.com/9M2PJU/aprx/actions/workflows/release.yml/badge.svg)](https://github.com/9M2PJU/aprx/actions/workflows/release.yml)
+[![Docker](https://img.shields.io/badge/docker-GHCR%20%7C%20DockerHub-blue.svg)](https://github.com/9M2PJU/aprx/pkgs/container/aprx)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20FreeBSD%20%7C%20macOS-lightgrey.svg)](https://github.com/9M2PJU/aprx/releases)
 
 *A high-performance, ultra-lightweight gateway and digipeater bridging RF amateur radio networks with the global APRS-IS backbone.*
@@ -18,7 +19,11 @@
 
 1. [Overview & Features](#-overview--features)
 2. [Supported Platforms & Packages](#-supported-platforms--packages)
-3. [Installation Guide (By Operating System)](#-installation-guide)
+3. [🐳 Docker & Container Deployment](#-docker--container-deployment)
+   - [Pulling Images (GHCR & Docker Hub)](#pulling-the-image)
+   - [Running with Docker CLI](#running-with-docker-cli)
+   - [Running with Docker Compose](#running-with-docker-compose)
+4. [Installation Guide (By Operating System)](#-installation-guide)
    - [Debian & Ubuntu](#1-debian--ubuntu)
    - [Raspberry Pi OS (arm64 & armhf)](#2-raspberry-pi-os-32-bit--64-bit)
    - [Fedora, RHEL & Rocky Linux](#3-fedora-rhel--rocky-linux)
@@ -26,20 +31,20 @@
    - [FreeBSD](#5-freebsd)
    - [macOS (Apple Silicon & Intel)](#6-macos-apple-silicon--intel)
    - [Building from Source (Universal)](#7-building-from-source-universal)
-4. [Configuration Guide](#-configuration-guide)
+5. [Configuration Guide](#-configuration-guide)
    - [Configuration File Locations](#configuration-file-locations)
    - [Scenario A: Simple Rx-Only IGate (Serial TNC or TCP KISS)](#scenario-a-simple-rx-only-igate)
    - [Scenario B: Full 2-Way IGate with Viscous Digipeater](#scenario-b-full-2-way-igate--viscous-digipeater)
    - [Scenario C: Direwolf Software Modem over TCP](#scenario-c-direwolf-soundcard-modem-via-tcp-kiss)
    - [Scenario D: Linux Kernel AX.25 Interface](#scenario-d-linux-kernel-ax25-interface)
-5. [Running & Service Management](#-running--service-management)
+6. [Running & Service Management](#-running--service-management)
    - [Testing & Foreground Debug Mode](#testing--foreground-debug-mode)
    - [Linux (systemd)](#linux-systemd-service)
    - [FreeBSD (rc.d)](#freebsd-rcd-service)
    - [macOS (launchd)](#macos-launchd-service)
-6. [Statistics & Telemetry (`aprx-stat`)](#-statistics--telemetry-aprx-stat)
-7. [Troubleshooting & Best Practices](#-troubleshooting--best-practices)
-8. [Maintainers & Credits](#-maintainers--credits)
+7. [Statistics & Telemetry (`aprx-stat`)](#-statistics--telemetry-aprx-stat)
+8. [Troubleshooting & Best Practices](#-troubleshooting--best-practices)
+9. [Maintainers & Credits](#-maintainers--credits)
 
 ---
 
@@ -72,6 +77,72 @@ Automated release packages and binaries are generated directly by GitHub Actions
 | **macOS** | `arm64` (Apple Silicon) | Standalone ZIP | `aprx-2.9.1-macos-arm64.zip` |
 
 👉 Download pre-built assets from the **[Releases Page](https://github.com/9M2PJU/aprx/releases)**.
+
+---
+
+## 🐳 Docker & Container Deployment
+
+Multi-architecture container images (`linux/amd64`, `linux/arm64`, `linux/arm/v7`) are automatically built and published to **GitHub Container Registry (GHCR)** and **Docker Hub**.
+
+### Pulling the Image
+```bash
+# From GitHub Container Registry (Recommended)
+docker pull ghcr.io/9m2pju/aprx:latest
+
+# Or from Docker Hub
+docker pull 9m2pju/aprx:latest
+```
+
+### Running with Docker CLI
+
+#### 1. With Direwolf over TCP / APRS-IS Gateway:
+```bash
+docker run -d \
+  --name aprx \
+  --restart unless-stopped \
+  -v $(pwd)/aprx.conf:/etc/aprx.conf:ro \
+  -v aprx-logs:/var/log/aprx \
+  ghcr.io/9m2pju/aprx:latest
+```
+
+#### 2. With a Physical USB Hardware TNC (`/dev/ttyUSB0`):
+```bash
+docker run -d \
+  --name aprx \
+  --restart unless-stopped \
+  --device /dev/ttyUSB0:/dev/ttyUSB0 \
+  -v $(pwd)/aprx.conf:/etc/aprx.conf:ro \
+  -v aprx-logs:/var/log/aprx \
+  ghcr.io/9m2pju/aprx:latest
+```
+
+### Running with Docker Compose
+
+Create a `docker-compose.yml` file:
+```yaml
+services:
+  aprx:
+    image: ghcr.io/9m2pju/aprx:latest
+    container_name: aprx
+    restart: unless-stopped
+    volumes:
+      - ./aprx.conf:/etc/aprx.conf:ro
+      - aprx-logs:/var/log/aprx
+    # If using a physical USB TNC:
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    # If using host network (for Direwolf running on host localhost):
+    # network_mode: host
+
+volumes:
+  aprx-logs:
+```
+
+Start the container:
+```bash
+docker compose up -d
+docker compose logs -f
+```
 
 ---
 
@@ -241,6 +312,7 @@ sudo make install
 | Operating System | Default Configuration Path |
 | :--- | :--- |
 | **Linux (All distributions)** | `/etc/aprx.conf` |
+| **Docker Container** | `/etc/aprx.conf` |
 | **macOS** | `/etc/aprx.conf` (or `/usr/local/etc/aprx.conf`) |
 | **FreeBSD** | `/usr/local/etc/aprx.conf` |
 

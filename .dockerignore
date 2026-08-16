@@ -1,0 +1,17 @@
+.git
+.github
+*.o
+*.d
+*.tar.gz
+*.zip
+*.deb
+*.rpm
+*.pkg
+*.pkg.tar.zst
+aprx
+aprx-stat
+pkg-output/
+config.log
+config.status
+config.h
+Makefile

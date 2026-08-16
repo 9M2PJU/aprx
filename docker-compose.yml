@@ -1,0 +1,20 @@
+services:
+  aprx:
+    image: ghcr.io/9m2pju/aprx:latest
+    container_name: aprx
+    restart: unless-stopped
+    # Use host networking if Direwolf is on localhost or for AX.25 network ports:
+    # network_mode: host
+    volumes:
+      - ./aprx.conf:/etc/aprx.conf:ro
+      - aprx-logs:/var/log/aprx
+    # If connecting to a physical USB TNC:
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    # If using Linux Kernel AX.25 sockets:
+    # cap_add:
+    #   - NET_ADMIN
+    #   - NET_RAW
+
+volumes:
+  aprx-logs:
