@@ -19,11 +19,12 @@
 
 1. [Overview & Features](#-overview--features)
 2. [Supported Platforms & Packages](#-supported-platforms--packages)
-3. [🐳 Docker & Container Deployment](#-docker--container-deployment)
+3. [⚡ Quick Start: Automated Installer](#-quick-start-automated-one-liner-installer)
+4. [🐳 Docker & Container Deployment](#-docker--container-deployment)
    - [Pulling Image from GHCR](#pulling-the-image)
    - [Running with Docker CLI](#running-with-docker-cli)
    - [Running with Docker Compose](#running-with-docker-compose)
-4. [Installation Guide (By Operating System)](#-installation-guide)
+5. [Installation Guide (Manual / By Operating System)](#-installation-guide)
    - [Debian & Ubuntu](#1-debian--ubuntu)
    - [Raspberry Pi OS (arm64 & armhf)](#2-raspberry-pi-os-32-bit--64-bit)
    - [Fedora, RHEL & Rocky Linux](#3-fedora-rhel--rocky-linux)
@@ -77,6 +78,23 @@ Automated release packages and binaries are generated directly by GitHub Actions
 | **macOS** | `arm64` (Apple Silicon) | Standalone ZIP | `aprx-2.9.1-macos-arm64.zip` |
 
 👉 Download pre-built assets from the **[Releases Page](https://github.com/9M2PJU/aprx-installer/releases)**.
+
+---
+
+## ⚡ Quick Start: Automated One-Liner Installer
+
+Install Aprx in seconds on any supported OS (Debian, Ubuntu, Raspberry Pi OS, Fedora, Arch Linux, FreeBSD, macOS):
+
+```bash
+curl -sSL https://raw.githubusercontent.com/9M2PJU/aprx-installer/master/install.sh | sudo bash
+```
+
+### What the installer handles interactively:
+1. 🔍 **Auto-Detection:** Detects your OS distribution and CPU architecture (`x86_64`, `arm64`, `armhf`).
+2. 📦 **Installation Choices:** Lets you choose between **Native System Package / Binary** or **Docker Container (GHCR)**.
+3. ⚙️ **Interactive Configuration:** Shows and opens the configuration file (`/etc/aprx.conf` or `~/aprx-docker/aprx.conf`) in your editor (`nano` / `vim`) so you can fill in your callsign, passcode, and TNC device.
+4. 🚀 **Service Activation:** Asks to enable and start the `systemd` or `rc.d` service / Docker container immediately.
+5. 📊 **Diagnostics:** Displays quick status and verified monitoring commands (`aprx-stat`).
 
 ---
 
