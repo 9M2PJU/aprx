@@ -8,10 +8,7 @@ Source0:        http://ham.zmailer.org/oh2mqk/aprx/%{name}-%{version}.tar.gz
 
 
 %if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
-BuildRequires:  systemd-units
-%endif
-
-%if 0%{?fedora} >= 18
+BuildRequires:  systemd
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -24,32 +21,6 @@ Requires(postun): systemd
 
 %postun
 %systemd_postun_with_restart %{name}.service 
-
-%else 0%{?fedora} = 17
-Requires(post): systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-
-%post
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-
-%preun
-if [ $1 -eq 0 ] ; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable aprx.service > /dev/null 2>&1 || :
-    /bin/systemctl stop aprx.service > /dev/null 2>&1 || :
-fi
-
-%postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart aprx.service >/dev/null 2>&1 || :
-fi
-
 %endif
 
 %description

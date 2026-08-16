@@ -80,6 +80,7 @@ jobs:
           useradd -m builduser || true
           mkdir -p /home/builduser/build
           cp -r . /home/builduser/build/
+          cp archlinux/PKGBUILD /home/builduser/build/PKGBUILD
           chown -R builduser:builduser /home/builduser
           su builduser -c "cd /home/builduser/build && makepkg -e --nodeps --noconfirm"
           find /home/builduser/build -maxdepth 1 -name "*.pkg.tar.zst" -exec mv {} pkg-output/ \; || true
