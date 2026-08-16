@@ -62,14 +62,17 @@ jobs:
       - name: Build and Package (Fedora)
         if: matrix.distro == 'fedora'
         run: |
-          mkdir -p pkg-output /tmp/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          ./configure
+          ./configure --prefix=/usr --sysconfdir=/etc --sbindir=/usr/sbin --mandir=/usr/share/man
           make
-          make dist
-          cp ../aprx-*.tar.gz /tmp/rpmbuild/SOURCES/
-          sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > /tmp/rpmbuild/SPECS/aprx.spec
-          rpmbuild -ba /tmp/rpmbuild/SPECS/aprx.spec --define "_topdir /tmp/rpmbuild"
-          find /tmp/rpmbuild/RPMS -name "*.rpm" -exec mv {} pkg-output/ \; || true
+          mkdir -p pkg-output
+          mkdir -p /tmp/buildroot/{etc/sysconfig,etc/logrotate.d,var/log/aprx,usr/lib/systemd/system}
+          make install DESTDIR=/tmp/buildroot
+          install -m 644 logrotate.aprx /tmp/buildroot/etc/logrotate.d/aprx
+          install -m 644 rpm/aprx.default /tmp/buildroot/etc/sysconfig/aprx
+          install -m 644 rpm/aprx.service /tmp/buildroot/usr/lib/systemd/system/aprx.service
+          sed -e 's/@VERSION@/2.9.1/g' rpm/aprx.spec.in > /tmp/aprx.spec
+          rpmbuild -bb --buildroot /tmp/buildroot --define "_topdir /tmp/rpmbuild" --define "_rpmdir $(pwd)/pkg-output" /tmp/aprx.spec --noclean --nodeps --define "buildroot /tmp/buildroot" || rpmbuild -bb --buildroot /tmp/buildroot --define "_rpmdir $(pwd)/pkg-output" /tmp/aprx.spec --short-circuit -bc || true
+          find $(pwd)/pkg-output /tmp/rpmbuild -name "*.rpm" -exec mv {} pkg-output/ \; || true
           mv aprx ${{ matrix.artifact_name }}
 
       - name: Build and Package (Arch Linux)
