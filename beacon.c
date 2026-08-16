@@ -689,7 +689,7 @@ int beacon_config(struct configfile *cf)
 static void fix_beacon_time(char *txt, int txtlen)
 {
 	int hour, min, sec;
-	char hms[8];
+	char hms[16];
 	struct timeval zulutime;
 
 	gettimeofday(&zulutime, NULL);
@@ -697,7 +697,7 @@ static void fix_beacon_time(char *txt, int txtlen)
 	hour = sec / 3600;
 	min  = (sec / 60) % 60;
 	sec  = sec % 60;
-	sprintf(hms, "%02d%02d%02dh", hour, min, sec);
+	snprintf(hms, sizeof(hms), "%02d%02d%02dh", hour, min, sec);
 
 	txt += 2; txtlen -= 2; // Skip Control+PID
 
